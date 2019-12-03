@@ -61,40 +61,46 @@ func addRoute(r route, t [][]string, center junction) ([][]string, []junction) {
 				for i := 0; i < m.distance; i++ {
 					curY+=1
 					//mark the moves if not marked. If marked, mark as an intersection
-					if t[curX][curY] == mark {
+					if t[curY][curX] == mark {
 						junctions = append(junctions, junction{ x: curX, y: curY})
-						t[curX][curY] = intersection
+						t[curY][curX] = intersection
 					} else {
-						t[curX][curY] = mark
+						t[curY][curX] = mark
 					}
 				}
 			case "D":
+				for i := 0; i < m.distance; i++ {
 					curY-=1
 					//mark the moves if not marked. If marked, mark as an intersection
-					if t[curX][curY] == mark {
+					if t[curY][curX] == mark {
 						junctions = append(junctions, junction{ x: curX, y: curY})
-						t[curX][curY] = intersection
+						t[curY][curX] = intersection
 					} else {
-						t[curX][curY] = mark
+						t[curY][curX] = mark
 					}
+				}
 			case "L":
+				for i := 0; i < m.distance; i++ {
 					curX-=1
 					//mark the moves if not marked. If marked, mark as an intersection
-					if t[curX][curY] == mark {
+					if t[curY][curX] == mark {
 						junctions = append(junctions, junction{ x: curX, y: curY})
-						t[curX][curY] = intersection
+						t[curY][curX] = intersection
 					} else {
-						t[curX][curY] = mark
+						t[curY][curX] = mark
 					}
+				}
 			case "R":
+				for i := 0; i < m.distance; i++ {
 					curX+=1
 					//mark the moves if not marked. If marked, mark as an intersection
-					if t[curX][curY] == mark {
+					if t[curY][curX] == mark {
 						junctions = append(junctions, junction{ x: curX, y: curY})
-						t[curX][curY] = intersection
+						t[curY][curX] = intersection
 					} else {
-						t[curX][curY] = mark
+						t[curY][curX] = mark
 					}
+				}
 			default:
 				panic("Whyyyy222")
 		}
@@ -105,13 +111,18 @@ func addRoute(r route, t [][]string, center junction) ([][]string, []junction) {
 
 func calculateIntersection(j []junction, center junction) int{
 	result := math.MaxInt32
-
+	for _, instance := range j {
+		distance := int(math.Abs(float64(instance.x - center.x)) + math.Abs(float64(instance.y - center.y)))
+		if distance < result{
+			result = distance
+		}
+	}
 	return result
 }
 
 func main() {
 
-	file, err := os.Open("./input4.txt")
+	file, err := os.Open("./input2.txt")
 	check(err)
 	defer file.Close()
 
@@ -146,9 +157,21 @@ func main() {
 	height := maxU + maxD + 1
 	fmt.Printf("\nmaxU: %d, maxD: %d, maxL: %d, maxR: %d, width: %d, height: %d\n", maxU, maxD, maxL, maxR, width, height)
 
-	t := make([][]string, width)
-	for i := 0; i < width; i++ {
-		t[i] = make([]string, height)
+	/*
+	a = [3][4]int{  
+		{0, 1, 2, 3} ,   
+		{4, 5, 6, 7} ,   
+		{8, 9, 10, 11}   
+	}
+	*/
+
+	t := make([][]string, height)
+	for i := 0; i < height; i++ {
+		t[i] = make([]string, width)
+
+		for j := range t[i] {
+			t[i][j] = "-"
+		}
 	}
 
 	//mark the "center" junction
@@ -156,21 +179,19 @@ func main() {
 		x: width - maxR,
 		y: height - maxU,
 	}
-	fmt.Println(t)
+
+	//fmt.Println(t)
 	fmt.Printf("\ncenterX: %d, centerY: %d\n", center.x, center.y)
+	fmt.Printf("\ntable width: %d, table height: %d\n", len(t[0]), len(t))
 
-	t[center.x][center.y] = start
+	t[center.y][center.x] = start
 	center = junction{ x: center.x, y: center.y}
-
 
 	junctions := make([]junction,0)
 	j := make([]junction,0)
 	for _, route := range routes{
 		t, j = addRoute(route, t, center)
 		junctions = append(junctions, j...)
-	}
-	for i := 0; i < width; i++ {
-		fmt.Println(t[i])
 	}
 	//need to find the junctions
 	
